@@ -1,0 +1,28 @@
+spring:
+  cache:
+    jcache:
+      provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
+    cache-names:
+      - rate-limit-bucket
+    caffeine:
+      spec: maximumSize=100000,expireAfterAccess=3600s
+
+bucket4j:
+  enabled: true
+  filters:
+    - cache-key: getRemoteAddr()
+      cache-name: rate-limit-bucket
+      url: /login
+      rate-limits:
+        - bandwidths:
+            - capacity: 3
+              time: 20
+              unit: minutes
+    - cache-key: getRemoteAddr()
+      cache-name: rate-limit-bucket
+      url: ^((?!/login).)*$
+      rate-limits:
+        - bandwidths:
+            - capacity: 20
+              time: 1
+              unit: minutes
